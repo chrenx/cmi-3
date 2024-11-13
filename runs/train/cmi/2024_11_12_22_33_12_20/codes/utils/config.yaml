@@ -1,0 +1,23 @@
+---
+# project information ------------------------------------------------------------------------------
+exp_name: "cmi"
+description: ""  # important notes (str)
+save_dir: null                   # save important files, weights, etc., will be intialized if null
+wandb_pj_name: "cmi"
+wandb_entity: "chrenx"           # wandb account
+disable_wandb: True              #!!!!!!!!
+seed: 42                         # int
+debug: false
+model_type: 1
+
+# data ---------------------------------------------------------------------------------------------
+data_dir: "data/processed_data"
+
+# GPU ----------------------------------------------------------------------------------------------
+cuda_id: "9"                     #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+# train --------------------------------------------------------------------------------------------
+save_best_model: True
+penalty_cost: 0
+batch_size: 64
+lr: 1.0e-3

@@ -1,0 +1,22 @@
+!!python/object/new:utils.setup.DotDict
+dictitems:
+  exp_name: cmi
+  description: ''
+  save_dir: runs/train/cmi/2024_11_12_22_33_59_10
+  wandb_pj_name: cmi
+  wandb_entity: chrenx
+  disable_wandb: true
+  seed: 42
+  debug: false
+  model_type: 1
+  data_dir: data/processed_data
+  cuda_id: '9'
+  save_best_model: true
+  penalty_cost: 0
+  batch_size: 64
+  lr: 0.001
+  cur_time: '2024_11_12_22_33_59_10'
+  weights_dir: runs/train/cmi/2024_11_12_22_33_59_10/weights
+  codes_dir: runs/train/cmi/2024_11_12_22_33_59_10/codes
+  device_info: NVIDIA L40S
+  device: cuda:9
