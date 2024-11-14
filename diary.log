@@ -3,8 +3,8 @@ gene expr: CCL3
 
 t cell polarization
     Th1/Th2 (IFN-γ/IL-5)
-    Th1: IFN-γ: P01579_PT   (protein_id)
-    Th2: IL-5:  P05113_PT   (protein_id)
+    Th1: IFN-γ: PT_P01579   (protein_id)
+    Th2: IL-5:  PT_P05113   (protein_id)
 
 t cell polarization
     protein_id + DMSO 一直都是1.0
@@ -30,25 +30,32 @@ model_1: (data_1_)
     2020,2021,2022,2023
     exclude t_cell & legendplex
 
-    gene_expr(tsvd), ab_titer, cell_freq, cytokine_olink(tsvd),
-    (-9)infancy_vac, biological_sex, ethnicity, race, age, 
-    day_diff_1, day_diff_3, day_diff_14, day_diff_30(-1)
     input value shape: (571, 445)
+        gene_expr(tsvd), ab_titer, cell_freq, cytokine_olink(tsvd),
+        (-9)infancy_vac, biological_sex, ethnicity, race, age, 
+        day_diff_1, day_diff_3, day_diff_14, day_diff_30(-1)
 
 
     target value shape: (571, 5)
-        d1: cell freq
-        d3: gene expr
-        d14: ab titer
-        d30: t_cell polar
-        d30: t_cell activ
+        d1: cell freq               Monocytes
+        d3: gene expr               ENSG00000277632.1
+        d14: ab titer               IgG_PT
+        d30: t_cell polar           PT_P01579
+        d30: t_cell activ           PT_P05113
+
+    
 
 model_2: (data_2_)
     2021,2022,2023
     include t_cell & legendplex
 
+    input value shape: (287, 419)
+        gene_expr(tsvd), ab_titer, cell_freq, cytokine_olink(tsvd), cytokine_legendplex, 
+        tcell_polar, tcell_activ
+        (-9)infancy_vac, biological_sex, ethnicity, race, age, 
+        day_diff_1, day_diff_3, day_diff_14, day_diff_30(-1)
 
-    target value shape: (571, 5)
+    target value shape: (287, 5)
         d1: cell freq
         d3: gene expr
         d14: ab titer
