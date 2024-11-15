@@ -1,11 +1,14 @@
-import logging, os, time
+import glob, logging, os, time
 
 import torch, wandb
+import numpy as np
+from torch.optim import Adam, AdamW, SGD
 from torch.utils import data
+from torch.utils.data import Subset
 
 from utils.data.cmi_dataset import CMIDataset
-from utils.setup import parse_opt, create_dirs_save_files, set_seed, set_redirect_printing
-from utils.train_utils import cycle_dataloader
+from utils.setting import parse_opt, create_dirs_save_files, set_seed, set_redirect_printing
+from utils.train_utils import ModelLoader, cycle_dataloader
 
 os.environ['TZ'] = 'America/New_York'
 time.tzset()
@@ -17,22 +20,44 @@ class Trainer(object):
     def __init__(self, opt):
         super().__init__()
         
-        # self.model = ModelLoader(opt.exp_name, opt).model
-        # self.model.to(opt.device)
-        
+        self.device = opt.device
         self.use_wandb = not opt.disable_wandb
-        self.save_best_model = opt.save_best_model
         self.weights_dir = opt.weights_dir
-        # self.warmup_steps = opt.lr_scheduler_warmup_steps
+        self.warmup_steps = opt.lr_scheduler_warmup_steps
         self.penalty_cost = opt.penalty_cost
-        
+        self.optimizer = opt.optimizer
+        self.lr = opt.lr
+        self.weight_decay = opt.weight_decay
+        self.eps = opt.eps
+
+        self.train_n_batch, self.val_n_batch, self.test_n_batch = None, None, None
+        self.train_dl, self.val_dl, self.test_dl = None, None, None
+        self.model = ModelLoader(opt).model.to(self.device)
+
         if self.use_wandb:
             MYLOGGER.info("Initialize W&B")
             wandb.init(config=opt, project=opt.wandb_pj_name, entity=opt.entity, 
                        name=opt.exp_name, dir=opt.save_dir)
             opt.wandb = wandb
-        
+
+        # self.optimizer = get_optimizer(self.optimizer, )
+
+
         self._prepare_dataloader(opt) 
+        self._set_optimier()
+
+
+        print("len train dataset:", len(self.train_ds))
+        print("train_n_batch:", self.train_n_batch)
+        print("len val dataset:", len(self.val_ds))
+        print("val_n_batch:", self.val_n_batch)
+        print("len test dataset:", len(self.test_ds))
+        print("test_n_batch:", self.test_n_batch)
+        print("lr: ", self.lr)
+
+        exit(0)
+        print()
+
 
         # self.optimizer = None
         # self.cur_step = 0
@@ -66,43 +91,48 @@ class Trainer(object):
         # opt.model_num_params = count_model_parameters(self.model)
         
     def _prepare_dataloader(self, opt):
-        MYLOGGER.info("Loading training data ...")
-        
-        self.train_ds = CMIDataset(opt, mode='train')
-        
-        # self.val_ds = CMIDataset(opt, mode='val')
-        
-        # self.test_ds = CMIDataset(opt, mode='test')
-        
-        # dl = data.DataLoader(self.train_ds, 
-        #                     batch_size=opt.batch_size, 
-        #                     shuffle=True, 
-        #                     pin_memory=False, 
-        #                     num_workers=0)
-        # self.train_n_batch = len(dl) 
-        # self.train_dl = cycle_dataloader(dl)
-        # opt.train_n_batch = self.train_n_batch
 
+        self.dataset = CMIDataset(opt)
+        train_idx = np.load("data/processed_data/model_1_train_idx.npy")
+        val_idx = np.load("data/processed_data/model_1_val_idx.npy")
+        test_idx = np.load("data/processed_data/model_1_test_idx.npy")
+        self.train_ds = Subset(self.dataset, train_idx)
+        self.val_ds = Subset(self.dataset, val_idx)
+        self.test_ds = Subset(self.dataset, test_idx)
+    
+        dl = data.DataLoader(self.train_ds, 
+                            batch_size=opt.batch_size, 
+                            shuffle=True, 
+                            pin_memory=False, 
+                            num_workers=0)
+        self.train_n_batch = len(dl) 
+        self.train_dl = cycle_dataloader(dl)
 
-        
-        # dl = data.DataLoader(self.val_ds, 
-        #                     batch_size=opt.batch_size, 
-        #                     shuffle=False, 
-        #                     pin_memory=False, 
-        #                     num_workers=0)
-        # self.val_n_batch = len(dl)
-        # self.val_dl = cycle_dataloader(dl)
-        # opt.val_n_batch = self.val_n_batch
-        
-        # dl = data.DataLoader(self.test_ds, 
-        #                     batch_size=opt.batch_size, 
-        #                     shuffle=False, 
-        #                     pin_memory=False, 
-        #                     num_workers=0)
-        # self.test_n_batch = len(dl)
-        # self.test_dl = cycle_dataloader(dl)
-        # opt.test_n_batch = self.test_n_batch
-        
+        dl = data.DataLoader(self.val_ds, 
+                            batch_size=opt.batch_size, 
+                            shuffle=False, 
+                            pin_memory=False, 
+                            num_workers=0)
+        self.val_n_batch = len(dl)
+        self.val_dl = cycle_dataloader(dl)
+
+        dl = data.DataLoader(self.test_ds, 
+                            batch_size=opt.batch_size, 
+                            shuffle=False, 
+                            pin_memory=False, 
+                            num_workers=0)
+        self.test_n_batch = len(dl)
+        self.test_dl = cycle_dataloader(dl)
+
+    def _set_optimier(self):
+        match self.optimizer:
+            case 'adam':
+                self.optimizer = Adam(self.model.parameters(), 
+                                      lr=self.lr, eps=self.eps, 
+                                      weight_decay=self.weight_decay)
+            case _:
+                raise "Give a proper name of optimizer"
+
     def _save_model(self, step, base, best=False):
         
         data = {

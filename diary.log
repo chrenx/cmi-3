@@ -30,10 +30,20 @@ model_1: (data_1_)
     2020,2021,2022,2023
     exclude t_cell & legendplex
 
-    input value shape: (571, 445)
-        gene_expr(tsvd), ab_titer, cell_freq, cytokine_olink(tsvd),
-        (-9)infancy_vac, biological_sex, ethnicity, race, age, 
-        day_diff_1, day_diff_3, day_diff_14, day_diff_30(-1)
+    model input value shape: (571, 445)
+        gene_expr(tsvd), 0:256
+        ab_titer, 256:338
+        cell_freq, 338:404
+        cytokine_olink(tsvd), 404:436
+        infancy_vac, 436
+        biological_sex, 437
+        ethnicity, 438
+        race, 439
+        age, 440
+        day_diff_1, 441
+        day_diff_3, 442
+        day_diff_14, 443
+        day_diff_30 444
 
 
     target value shape: (571, 5)
@@ -43,17 +53,31 @@ model_1: (data_1_)
         d30: t_cell polar           PT_P01579
         d30: t_cell activ           PT_P05113
 
+    challenge input (164, 445)
+
     
 
 model_2: (data_2_)
     2021,2022,2023
     include t_cell & legendplex
 
-    input value shape: (287, 419)
-        gene_expr(tsvd), ab_titer, cell_freq, cytokine_olink(tsvd), cytokine_legendplex, 
-        tcell_polar, tcell_activ
-        (-9)infancy_vac, biological_sex, ethnicity, race, age, 
-        day_diff_1, day_diff_3, day_diff_14, day_diff_30(-1)
+    model input value shape: (287, 419)
+        gene_expr(tsvd), 0:256
+        ab_titer, 256:291
+        cell_freq, 291:354
+        cytokine_olink(tsvd), 354:386
+        cytokine_legendplex, 386:400
+        tcell_polar, 400:406
+        tcell_activ, 406:410
+        infancy_vac, 410
+        biological_sex, 411
+        ethnicity, 412
+        race, 413
+        age, 414
+        day_diff_1, 415
+        day_diff_3, 416
+        day_diff_14, 417
+        day_diff_30 418
 
     target value shape: (287, 5)
         d1: cell freq
@@ -61,3 +85,5 @@ model_2: (data_2_)
         d14: ab titer
         d30: t_cell polar
         d30: t_cell activ
+
+    challenge input (164, 419)

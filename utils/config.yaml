@@ -5,19 +5,39 @@ description: ""  # important notes (str)
 save_dir: null                   # save important files, weights, etc., will be intialized if null
 wandb_pj_name: "cmi"
 wandb_entity: "chrenx"           # wandb account
-disable_wandb: True              #!!!!!!!!
+disable_wandb: false              #!!!!!!!!
 seed: 42                         # int
 debug: false
-model_type: 1
+model_n: 1                      # two type of model training
+challenge_mode: false
 
 # data ---------------------------------------------------------------------------------------------
 data_dir: "data/processed_data"
+data_aug_gauss_noise: True      #!!!!!!!!
+gauss_mean: 0.0
+gauss_std: 0.01
+preload_gpu: true
 
 # GPU ----------------------------------------------------------------------------------------------
-cuda_id: "9"                     #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+cuda_id: "9"                    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 # train --------------------------------------------------------------------------------------------
-save_best_model: True
+model_name: "encoder_decoder"
 penalty_cost: 0
-batch_size: 64
-lr: 1.0e-3
+batch_size: 32
+train_n_steps: 5000
+lr_scheduler_warmup_steps: 64
+lr: 9.97545796487608e-05 # 1.0e-3
+weight_decay: 1.7173609280566294e-07
+eps: 1.8042413185663546e-09
+optimizer: "adam"
+
+encoder_h_dim: 2048 
+decoder_h_dim: 2048 
+encoder_dropout_p: 0.1
+decoder_dropout_p: 0.1
+n_encoder_block: 1
+n_decoder_block: 5
+activation: "gelu"
+skip: false
+norm: "layer_norm"
