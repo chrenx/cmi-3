@@ -38,8 +38,8 @@ class CMIDataset(Dataset):
                 self.input = torch.tensor(self.input).to(self.device)
         else:
             self.input = np.load(os.path.join(self.data_dir, f"model_{self.model_n}_input.npy"))
-            self.target = np.load(os.path.join(self.data_dir, f"model_{self.model_n}_target.npy"))
-            self.target_mask = np.load(os.path.join(self.data_dir, 
+            self.gt = np.load(os.path.join(self.data_dir, f"model_{self.model_n}_target.npy"))
+            self.gt_mask = np.load(os.path.join(self.data_dir, 
                                                     f"model_{self.model_n}_target_mask.npy"))
             if self.data_aug_gauss_noise:
                 self._apply_gausion_noise()
@@ -48,13 +48,15 @@ class CMIDataset(Dataset):
                 self.input = torch.tensor(self.input).to(self.device)
 
                 #! do we actually need?
-                self.target = torch.tensor(self.target).to(self.device)
-                self.target_mask = torch.tensor(self.target_mask).to(self.device)
+                self.gt = torch.tensor(self.gt).to(self.device)
+                self.gt_mask = torch.tensor(self.gt_mask).to(self.device)
 
             print(f"Finish loading model {self.model_n} data -----------------------")
             print(f"    input      : {self.input.shape}")
-            print(f"    target     : {self.target.shape}")
-            print(f"    target_mask: {self.target_mask.shape}")
+            print(f"    gt     : {self.gt.shape}")
+            print(f"    gt_mask: {self.gt_mask.shape}")
+        
+        opt.input_dim = self.input.shape[1]
 
         print()
         
@@ -79,8 +81,8 @@ class CMIDataset(Dataset):
         }
 
         if self.opt.challenge_mode:
-            sample["gt"] = self.target[idx]
-            sample["gt_mask"] = self.target_mask[idx]
+            sample["gt"] = self.gt[idx]
+            sample["gt_mask"] = self.gt_mask[idx]
 
         return sample
     
